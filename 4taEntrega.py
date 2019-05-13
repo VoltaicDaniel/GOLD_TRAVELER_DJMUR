@@ -32,7 +32,7 @@ class jugador(pygame.sprite.Sprite):
 
 
         self.rect = self.image.get_rect()
-        self.rect.centerx = ancho/2
+        self.rect.centerx = ancho-830
         self.rect.centery = alto-65
 
         self.vida = True
@@ -42,6 +42,7 @@ class jugador(pygame.sprite.Sprite):
         """ animacion """
         self.right_states = {0: (41,26,90,134),1:(200,26,80,140),2:(140,26,70,138)}
         self.Rright_states = {0: (41,26,90,134),1:(500,26,200,140),2:(140,26,70,138)}
+
         self.direct = True
         self.salto = True
         self.salto_par = True
@@ -70,7 +71,10 @@ class jugador(pygame.sprite.Sprite):
             """ crear hasta donde se puede mover"""
             if self.rect.left <= 10 :
                 self.rect.left = 11
-                """ animacion"""
+
+
+
+    """ animacion"""
 
     def get_frame(self,frame_set):
         self.frame += 1
@@ -78,18 +82,21 @@ class jugador(pygame.sprite.Sprite):
             self.frame = 0
 
         return frame_set[self.frame]
+
     def clip(self,clipped_rect):
         if type(clipped_rect) is dict:
             self.imagenCarro.set_clip(pygame.Rect(self.get_frame(clipped_rect)))
         else:
             self.imagenCarro.set_clip(pygame.Rect(clipped_rect))
         return clipped_rect
+
     def Rclip (self, Rclipped_rect):
         if type (Rclipped_rect) is dict:
             self.inv_imagencarro.set_clip(pygame.Rect(self.get_frame(Rclipped_rect)))
         else:
             self.inv_imagencarro.set_clip(pygame.Rect(Rclipped_rect))
         return Rclipped_rect
+
     def update(self,direction):
         if direction == 'right':
             self.clip(self.right_states)
@@ -113,8 +120,9 @@ class jugador(pygame.sprite.Sprite):
 
 class Enemigos(pygame.sprite.Sprite):
     def __init__(self):
-        pygame.sprite.Sprite._init__(self)
-        self.imagenEnemigo = pygame.imagen.load("caja.png")
+        pygame.sprite.Sprite.__init__(self)
+        self.imagenEnemigo = pygame.image.load("veneno.png")
+        self.imagenEnemigo = pygame.transform.scale(self.imagenEnemigo,(50,50))
 
 
         """ atributos del enemigo"""
@@ -124,11 +132,33 @@ class Enemigos(pygame.sprite.Sprite):
 
 
         self.velocidad = 5 # velocidad con la que va a bajar
-        self.MaxDescenso = self.rect.top + 40
+        #self.MaxVel = self.rect.top + 40
+        """ define donde va a empezar el enemigo"""
+        
+        self.rect.centerx = ancho-670
+        self.rect.centery = alto-47
+        
+        
+        
+        
+        
+    def moverse(self):
+        if self.rect.centerx == self.rect.centerx:
+            self.rect.centerx -= self.velocidad
+        if self.rect.centerx == 50:
+            self.rect.centerx == 10
+            self.rect.centerx += self.velocidad
+            
+            
+    
+           
+       
+        
+            
 
 
     def dibujar(self,superficie):
-        self.imagenEnemigo = self.imagenPos
+        
         superficie.blit(self.imagenEnemigo,self.rect)
 
 class mundo:
@@ -141,7 +171,7 @@ class mundo:
     def cargarMapa(self, nivel):
         self.matrizMapa = []
         self.salida = []
-        self.abrir = open("map/"+ nivel +".json","r")
+        self.abrir = (open("map/"+ nivel +".json","r"))
         self.data = json.load(self.abrir)
         self.abrir.close()
         self.tilewidth = self.data["tilewidth"]
@@ -163,15 +193,17 @@ class mundo:
 #            (ord(str(self.cadena[idx + 2])) << 16) | (ord(str(self.cadena[idx + 3])) << 24)
             self.salida.append(self.cadena[idx])
 
-        print(self.salida)
+        #print(self.salida)
 
 
         for a1 in range (0, len(self.salida),self.widthmapa):
             self.matrizMapa.append(self.salida[a1:a1 + self.widthmapa])
 
         for k in range(self.heightmapa):
-            print (self.matrizMapa[k])
-        return
+            #print (self.matrizMapa[k])
+
+            return
+
     def array_tileset(self,img):
         self.x = 0
         self.y = 0
@@ -184,13 +216,12 @@ class mundo:
             self.x = 0
             self.y += 18
         return self.hojatiles
+
     def cortar(self, img, rectangulo):
         self.rect = pygame.Rect(rectangulo)
         self.image = pygame.Surface(self.rect.size).convert()
         self.image.blit(img, (0,0), self.rect)
         return self.image
-
-
 
 
 
@@ -210,11 +241,18 @@ def goldTraver():
 
     enJuego = True
 
+    """ creacion del enemigo"""
+    enemigo = Enemigos()
+
+
 
     while True:
         #global matrizMapa
         img = pygame.image.load("conejo_tileset.png")
-        mundo.cargarMapa(mundo, "primerMapa")
+        
+        imagenEnemigo = pygame.image.load("veneno.png") 
+        
+        mundo.cargarMapa(mundo,"primerMapa")
         hoja = mundo.array_tileset(mundo, img)
         for m in range(mundo.heightmapa):
             for l in range(mundo.widthmapa):
@@ -233,6 +271,11 @@ def goldTraver():
             """ crear eventos cuando se oprime una telca"""
 
             if enJuego == True:# se usa para saber si el jugador no ha perdido
+                
+                
+                """ hacer mover al enemigo mientras que el jugador no alla perdido"""
+                enemigo.moverse()
+                
 
                 if evento.type == pygame.KEYDOWN:
                     key = evento.dict["key"]
@@ -253,13 +296,14 @@ def goldTraver():
                     if evento.key == 273:
                         player.salto = True
                         if player.contadorfun == 0:
-                            player.rect.y -= player.velocidad
+                            player.rect.y -= 80
                             player.contadorfun += 1
 
                 if evento.type ==pygame.KEYUP:
                     if evento.key == 273:
                         player.contadorfun -= 1
-                        player.rect.y += player.velocidad
+                        player.rect.y += 80
+            
 
 
 
@@ -281,6 +325,9 @@ def goldTraver():
             player.dibujar(ventana)
         elif player.direct == False:
             player.rdibujar(ventana)
+
+        enemigo.dibujar(ventana)
+
 
 
 
