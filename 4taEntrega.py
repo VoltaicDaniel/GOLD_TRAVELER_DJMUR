@@ -23,10 +23,10 @@ class jugador(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.imagenCarro = pygame.image.load("sprites_gold.png")
-        self.imagenCarro.set_clip(pygame.Rect(126,26,90,140))
+        self.imagenCarro.set_clip(pygame.Rect(99,26,90,140))
         self.image = self.imagenCarro.subsurface(self.imagenCarro.get_clip())
         self.inv_imagencarro = pygame.transform.flip(self.imagenCarro,True,False)
-        self.inv_imagencarro.set_clip(pygame.Rect(41,26,90,140))
+        self.inv_imagencarro.set_clip(pygame.Rect(50,26,90,70))
         self.Rimage = self.inv_imagencarro.subsurface(self.inv_imagencarro.get_clip())
 
 
@@ -131,34 +131,43 @@ class Enemigos(pygame.sprite.Sprite):
         self.rect = self.imagenEnemigo.get_rect()
 
 
-        self.velocidad = 5 # velocidad con la que va a bajar
+        self.velocidad = 1 # velocidad con la que va a bajar
         #self.MaxVel = self.rect.top + 40
         """ define donde va a empezar el enemigo"""
-        
+
         self.rect.centerx = ancho-670
         self.rect.centery = alto-47
         
+        self.derecha = True
+        self.rect.left = self.rect.centerx
+        self.vidaEnemigo = True
         
         
-        
-        
-    def moverse(self):
-        if self.rect.centerx == self.rect.centerx:
-            self.rect.centerx -= self.velocidad
-        if self.rect.centerx == 50:
-            self.rect.centerx == 10
-            self.rect.centerx += self.velocidad
-            
-            
     
-           
-       
-        
+    def moverse(self):
+        if self.vidaEnemigo == True:
             
+            if self.derecha == True:
+                self.rect.left -= self.velocidad
+                if self.rect.left <  10:
+                    self.derecha = False
+        
+            else:
+                self.rect.left += self.velocidad
+                if self.rect.left > ancho-680:
+                    self.derecha =True
+            
+
+
+
+
+
+
+
 
 
     def dibujar(self,superficie):
-        
+
         superficie.blit(self.imagenEnemigo,self.rect)
 
 class mundo:
@@ -249,18 +258,22 @@ def goldTraver():
     while True:
         #global matrizMapa
         img = pygame.image.load("conejo_tileset.png")
-        
-        imagenEnemigo = pygame.image.load("veneno.png") 
-        
+
+        imagenEnemigo = pygame.image.load("veneno.png")
+
         mundo.cargarMapa(mundo,"primerMapa")
         hoja = mundo.array_tileset(mundo, img)
+        
         for m in range(mundo.heightmapa):
             for l in range(mundo.widthmapa):
                 minum = mundo.matrizMapa[m][l]
                 tileimg = hoja[minum - 1]
                 tileimg = pygame.transform.scale(tileimg,(mundo.tilewidth*2, mundo.tileheight*2))
                 ventana.blit(tileimg,(l*mundo.tilewidth*2,m*mundo.tileheight*2 + 10))
-        pygame.display.update()
+                
+       # pygame.display.update()
+        
+        enemigo.moverse()
 
         """ si el jugador da a la x de la venta se cierra la pantalla"""
 
@@ -271,11 +284,11 @@ def goldTraver():
             """ crear eventos cuando se oprime una telca"""
 
             if enJuego == True:# se usa para saber si el jugador no ha perdido
-                
-                
+
+
                 """ hacer mover al enemigo mientras que el jugador no alla perdido"""
-                enemigo.moverse()
                 
+
 
                 if evento.type == pygame.KEYDOWN:
                     key = evento.dict["key"]
@@ -303,7 +316,14 @@ def goldTraver():
                     if evento.key == 273:
                         player.contadorfun -= 1
                         player.rect.y += 80
-            
+                    
+        """creando las colisiones """         
+        if player.rect.colliderect(enemigo.rect):
+            enemigo.vidaEnemigo = False
+            enJuego = False
+            print(enemigo.rect,player.rect)
+        
+
 
 
 
@@ -327,6 +347,8 @@ def goldTraver():
             player.rdibujar(ventana)
 
         enemigo.dibujar(ventana)
+        
+            
 
 
 
