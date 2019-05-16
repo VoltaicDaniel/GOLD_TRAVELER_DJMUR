@@ -223,7 +223,7 @@ class mundo:
 
 class Tierra(pygame.sprite.Sprite):
     def __init__(self):
-        self.piso = pygame.image.load("piso.jpg")
+        self.piso = pygame.image.load("piso.png")
         self.piso = pygame.transform.scale(self.piso,(100,5))
 
         self.rect_piso = self.piso.get_rect()
