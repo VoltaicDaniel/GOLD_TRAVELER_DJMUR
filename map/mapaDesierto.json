@@ -1,0 +1,33 @@
+{ "height":21,
+ "infinite":false,
+ "layers":[
+        {
+         "compression":"zlib",
+         "data":"eJxzYmBgcBrFdMV\/gfgfEP8ftZeu5tLCHQMVpkMxvgaT3fT043BMI6N4FJODjwPxCSA+OcTEH+Lwz2AWHwxuGHXz4BQfDG4Y7m4uGoK4YghiAIrwRgg=",
+         "encoding":"base64",
+         "height":21,
+         "id":2,
+         "name":"Capa de Patrones 1",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":45,
+         "x":0,
+         "y":0
+        }],
+ "nextlayerid":3,
+ "nextobjectid":1,
+ "orientation":"orthogonal",
+ "renderorder":"right-down",
+ "tiledversion":"1.2.3",
+ "tileheight":16,
+ "tilesets":[
+        {
+         "firstgid":1,
+         "source":"conejo_tileset.tsx"
+        }],
+ "tilewidth":16,
+ "type":"map",
+ "version":1.2,
+ "width":45
+}
