@@ -398,37 +398,18 @@ def goldTraver():
                         player.rect.y += 80
 
         """creando las colisiones """
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        #ventana.blit(imagenFondo,(0,0))
         """ pinta el jugador en la ventana y la dibuja """
         if player.direct == True:
             player.dibujar(ventana)
         elif player.direct == False:
             player.rdibujar(ventana)
 
-        if len(jugador.listaDeDisparo) >0:
-            for x in jugador.listaDeDisparo:
+        if len(player.listaDeDisparo) >0:
+            for x in player.listaDeDisparo:
                 x.dibujar(ventana)
                 x.trayectoria()
                 if x.rect.top < -10:
-                    jugador.listaDeDisparo.remove(x)#si el proyectil salio de nuesra visa entonces
+                    player.listaDeDisparo.remove(x)#si el proyectil salio de nuesra visa entonces
                     #lo eliminamos
                 else:
                     #colision
