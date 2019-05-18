@@ -1,14 +1,8 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri May  3 18:53:20 2019
-
-@author: Daniel
-"""
 import base64
 import gzip
 import sys
 import pygame
-#import random
+import random
 from pygame.locals import *
 import json
 try:
@@ -18,6 +12,7 @@ except ImportError:
 """ variables globales"""
 ancho = 900
 alto = 450
+listaEnemigo = []
 
 class jugador(pygame.sprite.Sprite):
     def __init__(self):
@@ -48,6 +43,9 @@ class jugador(pygame.sprite.Sprite):
         self.salto_par = True
         self.contadorfun = 0
 
+        self.listaDeDisparo= []
+
+
 
 
         """ mover a la derecha """
@@ -72,6 +70,9 @@ class jugador(pygame.sprite.Sprite):
             if self.rect.left <= 10 :
                 self.rect.left = 11
 
+    def disparar(self,x,y):
+        miProyectil = proyectil.Proyectil(x,y,"disparoZanahoria.jpg",True)
+        self.listaDeDisparo.append(miProyectil)
 
 
     """ animacion"""
@@ -116,50 +117,108 @@ class jugador(pygame.sprite.Sprite):
         superficie.blit(self.Rimage,self.rect)
 
 
+class Proyectil(pygame.sprite.Sprite):
+    def __init__(self,posx,posy,ruta,personaje):
+        pygame.sprite.Sprite.__init__(self)
 
+        self.imagenProyectil = pygame.image.load(ruta)
+
+        self.rect = self.imageProyectil.get_rect()
+        self.velocidadDisparo = 5
+
+        self.rect.top = posy
+        self.rect.left = posx
+        self.disparoPersonaje = personaje
+
+    def trayectoria(self):
+        if self.disparoPersonaje == True:
+            self.rect.top = self.rect.top - self.velocidadDisparo
+        else:
+            self.rect.top = self.rect.top + self.velocidadDisparo
+
+    def dibujar(self,superficie):
+        superficie.blit(self.imageProyectil,self.rect)
 
 class Enemigos(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self,posx,posy,distancia,imagenUno,imagenDos):
         pygame.sprite.Sprite.__init__(self)
-        self.imagenEnemigo = pygame.image.load("veneno.png")
-        self.imagenEnemigo = pygame.transform.scale(self.imagenEnemigo,(50,50))
+        """ enemigo de tierra"""
+        self.imagenA = pygame.image.load(imagenUno)
+        self.imagenA =  pygame.transform.scale(self.imagenA,(50,50))
+
+        """ enemigo de aire"""
+        self.imagenB = pygame.image.load(imagenDos)
+        self.imagenB = pygame.transform.scale(self.imagenB,(25,25))
+
+
+
+        self.listaImagenes=[self.imagenA, self.imagenB]
+        self.imagenPos = 0
+        self.imagenDepredador = self.listaImagenes[self.imagenPos]
+        self.rect= self.imagenDepredador.get_rect()
+
+        self.listaDeDisparos =[]
+        self.velocidad = 5
+        self.rect.top = posy
+        self.rect.left = posx
+
+        self.rangoDisparo = 5
+        self.tiempoDeCambio =1
+
+        self.derecha = True
+        self.Contador = 0
+        self.maxDescenso = self.rect.top + 40
+
+        self.limiteDerecha = posx+ distancia
+        self.limiteIzquierda = posx-distancia
 
 
         """ atributos del enemigo"""
-        self.imagenPos = 0 # la posicion por defecto que se va a ir graduando manualmente
+        def comportamiento(self,tiempo):
+            self.movimientos()
 
-        self.rect = self.imagenEnemigo.get_rect()
+            self.ataque()
+            if self.tiempoCambio == tiempo:
+                self.imagenPos += 1
+                self.tiempoCambio +=1
 
+                if self.imagenPos > len(self.listaImagenes)-1:
+                    self.imagenPos = 0
 
-        self.velocidad = 1 # velocidad con la que va a bajar
-        #self.MaxVel = self.rect.top + 40
-        """ define donde va a empezar el enemigo"""
+        def ataque(self):
+            if (ranfom.randint(0,100) < self.rangoDisparo ):
+                self.disparo()
 
-        self.rect.centerx = ancho-670
-        self.rect.centery = alto-47
-        
-        self.derecha = True
-        self.rect.left = self.rect.centerx
-        self.vidaEnemigo = True
-        
-        
-    
-    def moverse(self):
-        if self.vidaEnemigo == True:
-            
-            if self.derecha == True:
-                self.rect.left -= self.velocidad
-                if self.rect.left <  10:
-                    self.derecha = False
-        
+        def disparo(self):
+            x,y = self.rect.center-10
+            miProyectil = proyectil.Proyectil(x,y,"disparob.jpg",False)
+            self.listaDeDisparos.append(miProyectil)
+
+        def movimientos(self):
+            if self.Contador < 5:
+                self.movimientoLateral()
             else:
-                self.rect.left += self.velocidad
-                if self.rect.left > ancho-680:
-                    self.derecha =True
-            
+                self.descenso()
+
+        def descenso(self):
+            if self.MaxDescenso == self.rect.top:
+                self.contador = 0
+                self.MaxDescenso = self.rect.top+ 40
+            else:
+                self.rect.top += 1
 
 
+        def movimientoLateral(self):
+                if self.derecha == True:
+                    self.rect.left = self.rect.left+ self.velocidad
+                    if self.rect.left > self.limiteDerecha:
+                        self.derecha = False
 
+                        self.contador += 1
+                    else:
+                        self.rect.left = self.rect.left - self.velocidad
+                        if self.rect.left < self.limiteIzquierda:
+                            self.derecha = True
 
 
 
@@ -167,8 +226,8 @@ class Enemigos(pygame.sprite.Sprite):
 
 
     def dibujar(self,superficie):
-
-        superficie.blit(self.imagenEnemigo,self.rect)
+        self.imagenDepredador = self.listaImagenes[self.imagenPos]
+        superficie.blit(self.imagenDepredador,self.rect)
 
 class mundo:
     def __init__(self):
@@ -233,7 +292,24 @@ class mundo:
         return self.image
 
 
+def CargarEnemigos():
+    enemigo1vida = True
+    enemigo2vida = False
+    if enemigo1vida == True:
+        posx = 100
+        for x in range(1,5):
+            enemigo1 = Enemigos(posx,100,40,'aguila.png','veneno.png')
+            listaEnemigo.append(enemigo1)
+            posx = posx +300
 
+        posx = 100
+
+    if enemigo2vida == True:
+        for x in range(1, 5):
+            enemigo2= Enemigos(posx,0,40,'aguila.png','veneno.png')
+            listaEnemigo.append(enemigo2)
+            posx = posx +200
+        posx = 100
 
 def goldTraver():
     pygame.init()
@@ -251,29 +327,33 @@ def goldTraver():
     enJuego = True
 
     """ creacion del enemigo"""
-    enemigo = Enemigos()
+    CargarEnemigos()
 
-
+    reloj = pygame.time.Clock()
 
     while True:
+        """cuantos frames se ejecutan por segundo"""
+        reloj.tick(60)
+        """ movimiento """
+        tiempo = pygame.time.get_ticks()/1000
         #global matrizMapa
         img = pygame.image.load("conejo_tileset.png")
 
-        imagenEnemigo = pygame.image.load("veneno.png")
+
 
         mundo.cargarMapa(mundo,"primerMapa")
         hoja = mundo.array_tileset(mundo, img)
-        
+
         for m in range(mundo.heightmapa):
             for l in range(mundo.widthmapa):
                 minum = mundo.matrizMapa[m][l]
                 tileimg = hoja[minum - 1]
                 tileimg = pygame.transform.scale(tileimg,(mundo.tilewidth*2, mundo.tileheight*2))
                 ventana.blit(tileimg,(l*mundo.tilewidth*2,m*mundo.tileheight*2 + 10))
-                
+
        # pygame.display.update()
-        
-        enemigo.moverse()
+
+
 
         """ si el jugador da a la x de la venta se cierra la pantalla"""
 
@@ -287,7 +367,7 @@ def goldTraver():
 
 
                 """ hacer mover al enemigo mientras que el jugador no alla perdido"""
-                
+
 
 
                 if evento.type == pygame.KEYDOWN:
@@ -316,13 +396,10 @@ def goldTraver():
                     if evento.key == 273:
                         player.contadorfun -= 1
                         player.rect.y += 80
-                    
-        """creando las colisiones """         
-        if player.rect.colliderect(enemigo.rect):
-            enemigo.vidaEnemigo = False
-            enJuego = False
-            print(enemigo.rect,player.rect)
-        
+
+        """creando las colisiones """
+
+
 
 
 
@@ -346,9 +423,23 @@ def goldTraver():
         elif player.direct == False:
             player.rdibujar(ventana)
 
-        enemigo.dibujar(ventana)
-        
-            
+        if len(jugador.listaDeDisparo) >0:
+            for x in jugador.listaDeDisparo:
+                x.dibujar(ventana)
+                x.trayectoria()
+                if x.rect.top < -10:
+                    jugador.listaDeDisparo.remove(x)#si el proyectil salio de nuesra visa entonces
+                    #lo eliminamos
+                else:
+                    #colision
+                    for enemigo  in listaEnemigo:
+                        if x.rect.colliderect(enemigo.rect):
+                            listaEnemigo.remove(enemigo)
+                            jugador.listaDeDisparo.remove(x)
+
+
+
+
 
 
 
