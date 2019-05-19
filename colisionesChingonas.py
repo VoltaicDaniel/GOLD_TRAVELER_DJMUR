@@ -350,7 +350,7 @@ def goldTraver():
 
 
 
-        mundo.cargarMapa(mundo,"primerMapa")
+        mundo.cargarMapa(mundo,"mapaDes")
         hoja = mundo.array_tileset(mundo, img)
 
         for m in range(mundo.heightmapa):
