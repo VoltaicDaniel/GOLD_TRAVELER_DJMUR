@@ -11,8 +11,8 @@ try:
 except ImportError:
     from io import StringIO
 """ variables globales"""
-ancho = 900
-alto = 450
+ancho = 1000
+alto = 650
 listaEnemigo = []
 
 class jugador(pygame.sprite.Sprite):
